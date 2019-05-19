@@ -1,0 +1,16 @@
+## Interface: 30500
+## Title: AraBroker - Money
+## Version: r10
+## Notes: A data broker plugin that displays a breakdown of the money owned on the server, and a simple balance history.
+## SavedVariables: AraBrokerMoneyDB
+## OptionalDeps: DepositBox!, NazScrooge
+## X-Credits: phyber (FuBar_MoneyFu)
+
+## _LoadManagers: AddonLoader
+## X-LoadOn-Always: delayed
+
+libs\LibStub.lua
+libs\CallbackHandler-1.0.lua
+libs\LibDataBroker-1.1.lua
+
+Ara_Broker_Money.lua
