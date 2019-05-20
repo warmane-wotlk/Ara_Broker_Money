@@ -1,7 +1,7 @@
-﻿local f = CreateFrame"Frame"
+local f = CreateFrame"Frame"
 local dropdown, dropdownInit = CreateFrame( "Frame", "AraBrokerMoneyDD", nil, "UIDropDownMenuTemplate" )
 local player = UnitName"player"
-local tipshown, config, days, chars, classes, f1, f2, f3
+local tipshown, config, days, chars, classes, f1, f2, f3, emblemOfFrosts, emblemOfTriumps, emblemOfConquer, emblemOfBrave, emblemOfStrength
 local t, sorted, defaultClass = {}, {}, { r=1, g=.8, b=0 }
 local ByMoney = function(a,b) return a.money > b.money end
 local ByName = function(a,b) return a.name < b.name end
@@ -113,8 +113,9 @@ block.OnEnter = function(self)
 	local itemCount45624 = GetItemCount("45624")
 	local itemCount47241 = GetItemCount("47241")
 	local itemCount49426 = GetItemCount("49426")
+
+	GameTooltip:AddLine"던전 및 공격대"
 	if itemCount29434>0 or itemCount40752>0 or itemCount40753>0 or itemCount45624>0 or itemCount47241>0 or itemCount49426>0 then
-		GameTooltip:AddLine"던전 및 공격대"
 		if itemCount49426>0 then
 			local text = format( "%s \124T%s:13\124t", itemCount49426, icons[20])
 			GameTooltip:AddDoubleLine("서리의 문장:", text, 1,1,1, 1,1,1)
@@ -137,6 +138,16 @@ block.OnEnter = function(self)
 		end
 		GameTooltip:AddLine" "
 	end
+
+	-- Show 서리/승전 for all players
+	for _, char in ipairs(sortChars(ByName)) do
+		local class = RAID_CLASS_COLORS[classes[char.name]] or defaultClass
+		local eof, eot, eoc, eob, eos = emblemOfFrosts[char.name], emblemOfTriumps[char.name], emblemOfConquer[char.name], emblemOfBrave[char.name], emblemOfStrength[char.name]
+
+		local text = format( "%s \124T%s:13\124t %s \124T%s:13\124t %s \124T%s:13\124t %s \124T%s:13\124t %s \124T%s:13\124t", eof, icons[20], eot, icons[16], eoc, icons[15], eob, icons[14], eos, icons[13])
+		GameTooltip:AddDoubleLine( char.name, text, class.r, class.g, class.b, 1,1,1)
+	end
+	GameTooltip:AddLine" "
 
 	local itemCountHonor = GetHonorCurrency()
 	local itemCount43228 = GetItemCount("43228")
@@ -212,7 +223,7 @@ block.OnEnter = function(self)
 	end
 	GameTooltip:AddLine" "
 
-	for _, char in ipairs(sortChars(ByMoney)) do
+	for _, char in ipairs(sortChars(ByName)) do
 		local class = RAID_CLASS_COLORS[classes[char.name]] or defaultClass
 		GameTooltip:AddDoubleLine( char.name, GetMoneyText(char.money, mode), class.r, class.g, class.b, 1,1,1 )
 	end
@@ -250,6 +261,12 @@ local function OnEvent(self, event, addon)
 			days[today] = othersMoney + ( chars[player] or currentMoney )
 		end
 		chars[player] = currentMoney
+		emblemOfFrosts[player] = GetItemCount("49426")
+		emblemOfTriumps[player] = GetItemCount("47241")
+		emblemOfConquer[player] = GetItemCount("45624")
+		emblemOfBrave[player] = GetItemCount("40753")
+		emblemOfStrength[player] = GetItemCount("40752")
+
 		if not session then session = othersMoney + currentMoney end
 		block.text = GetMoneyText(currentMoney, config.mode)
 		return tipshown and block.OnEnter(tipshown)
@@ -259,11 +276,17 @@ local function OnEvent(self, event, addon)
 	config = AraBrokerMoneyDB
 	config.mode = config.mode or "full" -- r5
 	config.tipMode = config.tipMode or "full" -- r6
-	local realm = GetRealmName()
-	config[realm] = config[realm] or { days={}, chars={} }
+	local realm = GetRealmName()	
+	if config.version ~= nil then		-- backward compatibility
+		config[realm] = config[realm] or { days={}, chars={}, eofs={}, eots={}, eocs={}, eobs={}, eoss={} }
+	else
+		config[realm] = { days={}, chars={}, eofs={}, eots={}, eocs={}, eobs={}, eoss={} }
+		config.version = 1
+	end
 	realm = config[realm]
 	realm.classes = realm.classes or {}
 	days, chars, classes = realm.days, realm.chars, realm.classes
+	emblemOfFrosts, emblemOfTriumps, emblemOfConquer, emblemOfBrave, emblemOfStrength = realm.eofs, realm.eots, realm.eocs, realm.eobs, realm.eoss
 	for k, v in next, chars do
 		if k~=player then othersMoney = othersMoney + v end
 	end
