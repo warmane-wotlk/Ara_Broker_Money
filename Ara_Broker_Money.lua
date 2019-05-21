@@ -140,15 +140,25 @@ block.OnEnter = function(self)
 	end
 
 	-- Show 서리/승전 for all players
+	local t_eof, t_eot, t_eoc, t_eob, t_eos = 0, 0, 0, 0, 0
 	for _, char in ipairs(sortChars(ByName)) do
 		local class = RAID_CLASS_COLORS[classes[char.name]] or defaultClass
 		local eof, eot, eoc, eob, eos = emblemOfFrosts[char.name], emblemOfTriumps[char.name], emblemOfConquer[char.name], emblemOfBrave[char.name], emblemOfStrength[char.name]
 
-		local text = format( "%s \124T%s:13\124t %s \124T%s:13\124t %s \124T%s:13\124t %s \124T%s:13\124t %s \124T%s:13\124t", eof, icons[20], eot, icons[16], eoc, icons[15], eob, icons[14], eos, icons[13])
+		local text = format( "%s \124T%s:13\124t %s \124T%s:13\124t %s \124T%s:13\124t %s \124T%s:13\124t %s \124T%s:13\124t",
+					eof, icons[20], eot, icons[16], eoc, icons[15], eob, icons[14], eos, icons[13])
 		GameTooltip:AddDoubleLine( char.name, text, class.r, class.g, class.b, 1,1,1)
+		t_eof = t_eof + eof
+		t_eot = t_eot + eot
+		t_eoc = t_eoc + eoc
+		t_eob = t_eob + eob
+		t_eos = t_eos + eos
 	end
-	GameTooltip:AddLine" "
+	local text2 = format( "%s \124T%s:13\124t %s \124T%s:13\124t %s \124T%s:13\124t %s \124T%s:13\124t %s \124T%s:13\124t",
+				t_eof, icons[20], t_eot, icons[16], t_eoc, icons[15], t_eob, icons[14], t_eos, icons[13])
+	GameTooltip:AddDoubleLine( "\n전체", "\n"..text2, 1,.8,0, 1,1,1 )
 
+	GameTooltip:AddLine" "
 	local itemCountHonor = GetHonorCurrency()
 	local itemCount43228 = GetItemCount("43228")
 	local itemCount37836 = GetItemCount("37836")
